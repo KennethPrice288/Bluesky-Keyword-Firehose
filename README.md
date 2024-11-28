@@ -9,3 +9,5 @@ This is a small CLI application that allows you to filter the bluesky firehose
 
 You can also switch between displaying posts with any keyword in them (default),
 or displaying posts with all keywords in them by using or_match and and_match
+
+EOF will stop the firehose if its running, and exit the program if its not
