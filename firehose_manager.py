@@ -1,7 +1,7 @@
 from atproto import AsyncFirehoseSubscribeReposClient, parse_subscribe_repos_message, models, CAR, firehose_models, AtUri, Client
 from datetime import datetime
 from matcher import Matcher
-
+import asyncio
 
 _INTERESTED_RECORDS = {
         models.ids.AppBskyFeedPost: models.AppBskyFeedPost,
@@ -34,8 +34,12 @@ class FirehoseManager:
     async def stop(self):
         if self.firehose_client:
             self.stats['end_time'] = datetime.now()
-            await self.firehose_client.stop()
-            self.firehose_client = None
+            try:
+                await asyncio.shield(self.firehose_client.stop())
+            except Exception as e:
+                print(f'Error stopping firehose: {e}')
+            finally:
+                self.firehose_client = None
 
     def get_runtime(self):
         if not self.stats['start_time']:

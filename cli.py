@@ -109,8 +109,21 @@ class KeywordPrompt(cmd.Cmd):
 
     def do_quit(self, arg):
         """Exit the prompt"""
-        self.do_stop(arg)
+        if self.firehose_task:
+            async def cleanup():
+                await self.firehose.stop()
+                await asyncio.sleep(0.5)
+
+            future = asyncio.run_coroutine_threadsafe(cleanup(), self.loop)
+            try:
+                future.result(timeout=2)
+            except Exception as e:
+                print(f'Cleanup error: {e}')
+
         self.loop.call_soon_threadsafe(self.loop.stop)
+        
+        self.loop_thread.join(timeout=1)
+        
         return True
     
     def do_exit(self, arg):
